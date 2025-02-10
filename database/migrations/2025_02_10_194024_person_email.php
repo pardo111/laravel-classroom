@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('person_email', function (Blueprint $table) {
             $table->id();
             $table->string('email')->unique();
+            $table->boolean('state');
             $table->timestamps();
         });    }    
 
