@@ -9,10 +9,17 @@ class Person extends Model
 {
     use HasFactory;
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+   
+    protected $table='person';
     protected $fillable  = [
         'name',
         'lastname',
         'born_date',
-        'state'
+        'state',
+        'user_id'
     ];
 }
