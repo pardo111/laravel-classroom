@@ -21,10 +21,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'lastname',
         'email',
-        'password',
+        'password',        
+        'born_date',
+         'rol',
+        'code',
     ];
-
+ 
+ 
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -47,8 +52,5 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function person()
-    {
-        return $this->hasOne(Person::class, 'user_id');
-    }
+
 }

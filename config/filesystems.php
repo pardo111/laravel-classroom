@@ -59,7 +59,11 @@ return [
             'throw' => false,
             'report' => false,
         ],
-
+        'local_bucket' => [
+        'driver' => 'local',
+        'root' => storage_path('app/bucket'), // Cambia la ruta si deseas otra ubicación
+        'visibility' => 'private',
+         ],
     ],
 
     /*
