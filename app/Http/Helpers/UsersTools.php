@@ -25,16 +25,15 @@ class UsersTools
     public static function Code (){
         $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()`~';
 
-        $code= substr(str_shuffle($caracteres), 0, 15) ; 
-
-        $exist= 'l;';
-        while($exist){
-            $exist = User::where('code',$code)->exists();
-
-            if(!$exist){
-                $code=substr_replace($code, (string) mt_rand(1, 9), mt_rand(1, 15), 1);
-            }
-        }
+ 
+        do {
+             $code = substr(str_shuffle($caracteres), 0, 15);
+    
+             $code = substr_replace($code, (string) mt_rand(1, 9), mt_rand(0, 14), 1);
+    
+             $exist = User::where('code', $code)->exists();
+    
+        } while ($exist);  
         return $code;
 
     }

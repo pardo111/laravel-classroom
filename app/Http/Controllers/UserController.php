@@ -8,12 +8,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Helpers\Tools;
 use App\Http\Helpers\UsersTools;
+/*
+
+
+*/
+
 
 
 class UserController extends Controller
 {
 
-    public function createUser(Request $request)
+    public static function createUser(Request $request)
     {
         $data_cleaned = Tools::cleanData($request, [
             'name',
@@ -28,16 +33,7 @@ class UserController extends Controller
         $data_cleaned['password'] = Hash::make($data_cleaned['password']);
         $data_cleaned['code'] = UsersTools::Code();
         try {
-            $user = User::create([
-                'name' => $data_cleaned['name'],
-                'lastname' => $data_cleaned['lastname'],
-                'email' => $data_cleaned['email'],
-                'password' => $data_cleaned['password'],
-                'born_date' => $data_cleaned['born_date'],
-                'rol' => $data_cleaned['rol'],
-                'code' => $data_cleaned['code']
-            ]);
-            return response()->json(['message' => 'Usuario creado con éxito', 'user' => $user], Response::HTTP_OK);
+             return User::create($data_cleaned);
         } catch (\Throwable $th) {
             return response()->json(["message" => $th]);
         }
@@ -49,8 +45,9 @@ class UserController extends Controller
     public static function getAll()
     {
         $users = User::all();
-
-        return $users ? response()->json(['data' => $users], Response::HTTP_OK) : response()->json('data not found', Response::HTTP_NOT_FOUND);
+        return $users ?
+            response()->json(['data' => $users], Response::HTTP_OK) :
+            response()->json('data not found', Response::HTTP_NOT_FOUND);
     }
 
 
@@ -64,23 +61,29 @@ class UserController extends Controller
         $expectedKeys = ['name', 'email', 'state'];
         $invalidKeys = array_diff(array_keys($dynamicKey), $expectedKeys);
 
+
         if (!empty($invalidKeys)) {
             return response()->json([
                 'message' => 'Invalid keys provided: ' . implode(', ', $invalidKeys)
             ], Response::HTTP_BAD_REQUEST);
         };
         $filteredKey = array_intersect_key($dynamicKey, array_flip($expectedKeys));
-        $query = User::query();
-        foreach ($filteredKey as $key => $value) {
-            if ($value !== '') {
-                $query->where($key, 'like', '%' . $value . '%');
-            }
-        }
+        $cacheKey = 'users_' . md5(json_encode($filteredKey));
 
-        $users = $query->take(10)->get();
+        $users = cache()->remember($cacheKey, 1, function () use ($filteredKey) {
+            $query = User::query();
+            foreach ($filteredKey as $key => $value) {
+                if ($value !== '') {
+                    $query->where($key, 'like', '%' . $value . '%');
+                }
+            }
+            return $query->take(5)->get();
+        });
 
         return $users->isNotEmpty()
             ? response()->json(['data' => $users], Response::HTTP_OK)
             : response()->json(['message' => 'Data not found'], Response::HTTP_NOT_FOUND);
     }
+
+    public static function registrer(Request $req) {}
 }
