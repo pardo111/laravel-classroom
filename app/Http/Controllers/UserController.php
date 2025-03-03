@@ -20,6 +20,7 @@ class UserController extends Controller
 
     public static function createUser(Request $request)
     {
+        try {
         $data_cleaned = Tools::cleanData($request, [
             'name',
             'lastname',
@@ -32,7 +33,7 @@ class UserController extends Controller
         $validate = UsersTools::ValidateData($data_cleaned);
         $data_cleaned['password'] = Hash::make($data_cleaned['password']);
         $data_cleaned['code'] = UsersTools::Code();
-        try {
+      
              return User::create($data_cleaned);
         } catch (\Throwable $th) {
             return response()->json(["message" => $th]);

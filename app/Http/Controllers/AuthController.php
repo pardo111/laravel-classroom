@@ -13,7 +13,9 @@ class AuthController extends Controller
     {
         $user  =   UserController::createUser($request);
 
- 
+        if ($user instanceof \Illuminate\Http\JsonResponse) {
+            return $user;
+        }
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -23,15 +25,15 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // 🔹 Iniciar sesión
-    public function login(Request $request)
+     public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+       try {
+         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
@@ -44,6 +46,9 @@ class AuthController extends Controller
             'token' => $token,
             'user' => $user,
         ]);
+       } catch (\Throwable $th) {
+        return response()->json(["error"=>$th]);
+       }
     }
 
     // 🔹 Cerrar sesión
