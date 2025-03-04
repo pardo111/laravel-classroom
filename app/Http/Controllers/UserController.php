@@ -27,7 +27,6 @@ class UserController extends Controller
             'email',
             'password',
             'born_date',
-            'state',
             'rol',
         ]);
         $validate = UsersTools::ValidateData($data_cleaned);

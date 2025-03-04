@@ -14,7 +14,7 @@ class UsersTools
         $validator = Validator::make($res, [
             'name' => 'required|string|max:50',
             'lastname' => 'required|string|max:50',
-            'born_date' => 'date',
+            'born_date' => 'required|date_format:Y-m-d',
             'password'=>'required|confirmed|min:8|max:40',
             'email'=>'required|email|unique:users,email'
         ]); 
