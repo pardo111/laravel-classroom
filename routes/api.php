@@ -16,3 +16,4 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('/getBy',[UserController::class , 'getBy']);
 });
 Route::post('/upload',[FileController::class,'upload']);
+    
