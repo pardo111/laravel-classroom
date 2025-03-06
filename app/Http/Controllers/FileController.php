@@ -15,40 +15,40 @@ use Symfony\Component\HttpFoundation\Response;
 class FileController extends Controller
 {
 
-    // file, pathHashed
-    public static function upload(Request $request)
+    public static function upload($file, $path, )
     {
         try {
-             $request->validate([
-                'user' => 'required|string',
-                'subject' => 'required|string',
-                'activity' => 'required|string',
-                'file' => 'required|file|mimes:jpeg,png,pdf,rar,zip',
-            ]);
-            $user = $request->input('user');
-            $subject = $request->input('subject');
-            $activity = $request->input('activity');
-            $file = $request->file('file');
-            $hashedUser = hash('sha256', $user);
-            $hashedSubject = hash('sha256', $subject);
-            $hashedActivity = hash('sha256', $activity);
 
-            if (!$file) {
-                return response()->json('error No se ha enviado ningún archivo',400);
-            }            
-            $path = storage_path('app/private/' . $hashedUser . '/' . $hashedSubject . '/' . $hashedActivity);
-
-            if (!File::exists($path)) {
-                File::makeDirectory($path, 0755, true);
-            }
             if ($file->isValid()) {
-                $filePath = $file->storeAs($hashedUser . '/' . $hashedSubject . '/' . $hashedActivity, $file->getClientOriginalName(), 'local');
-                return response()->json('success path', 200);
+                $filePath = $file->storeAs($path, $file->getClientOriginalName(), 'local');
+                return true;
             }
 
-            return back()->with('error', 'No se pudo subir el archivo');
+            return false;
         } catch (\Throwable $th) {
-            return response()->json(["error:" => $th->getMessage()]);
+            return[false , $th->getMessage()];
         }
+    }
+
+    public function getFile($fileName)
+    {
+        // Definir la ruta completa del archivo
+        $filePath = storage_path('app/private/' . $fileName);
+
+        // Verificar si el archivo existe
+        if (!File::exists($filePath)) {
+            return response()->json(['error' => 'Archivo no encontrado'], 404);
+        }
+
+        // Obtener el contenido del archivo
+        $fileContent = File::get($filePath);
+
+        // Obtener el tipo MIME del archivo
+        $mimeType = File::mimeType($filePath);
+
+        // Retornar el archivo como una respuesta
+        return response($fileContent, 200)
+            ->header('Content-Type', $mimeType)
+            ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
     }
 }
