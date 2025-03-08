@@ -34,5 +34,20 @@ class SubjectTools
 
     }
 
+    public static function codeSubject($name){
+        $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()`~';
+
+ 
+        do {
+             $code = substr(str_shuffle($name), 0, 5).substr(str_shuffle($caracteres), 0, 15);
+    
+             $code = substr_replace($code, (string) mt_rand(1, 9), mt_rand(0, 14), 1);
+    
+             $exist = Subject::where('code', $code)->exists();
+    
+        } while ($exist);  
+        return $code;
+    }
+
  
 }

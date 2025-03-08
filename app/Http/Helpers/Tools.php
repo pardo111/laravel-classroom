@@ -16,7 +16,7 @@ class Tools
              return [$item => trim($data->input($item, ''))];
         })->toArray();
         
-        return $cleanedData;
+        return $cleanedData; 
 
 
     }

@@ -85,5 +85,4 @@ class UserController extends Controller
             : response()->json(['message' => 'Data not found'], Response::HTTP_NOT_FOUND);
     }
 
-    public static function registrer(Request $req) {}
 }
