@@ -14,8 +14,6 @@ return new class extends Migration
         Schema::create('category', callback: function (Blueprint $table) {
             $table->id();
             $table->string('category', 14)->unique();
-            $table->boolean('state');
-            $table->timestamps();
         });    }
 
     /**

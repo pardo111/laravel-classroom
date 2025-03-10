@@ -12,8 +12,6 @@ return new class extends Migration
         Schema::create('tags', function (Blueprint $table) {
             $table->id();
             $table->string('tags', 14)->unique();
-            $table->boolean('state');  
-            $table->timestamps();
         });    }
 
   

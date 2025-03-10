@@ -7,9 +7,8 @@ use App\Http\Controllers\FileController;
 use App\Http\Helpers\SubjectTools;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Subject;
-use App\Http\Helpers\Tools;
- use Illuminate\Support\Facades\Validator;
-
+use Exception;
+use Illuminate\Support\Facades\Validator;
 
 
 class SubjectController extends Controller
@@ -18,31 +17,46 @@ class SubjectController extends Controller
     public static function createSubject(Request $request)
     {
         try {
-            $data_cleaned = Tools::cleanData($request, [
-                'name',
-                'owner',
-                'description',
-                'duration',
-                'price',
-                'next_course',
-                'last_course'
-            ]);
-
+            $data_cleaned = [
+                'subject'     => $request['subject'],
+                'owner'       => $request['owner'],
+                'description' => $request['description'],
+                'duration'    => $request['duration'],
+                'price'       => $request['price']
+            ];
             $validator = Validator::make($data_cleaned, [
-                'name' => 'required|string|max:50',
-                'owner' => 'required',
+                'subject' => 'required|string|max:50',
+                'owner' => 'required|exists:users,id',
                 'description' => 'required|max:1000',
-                'duration' => 'required|time',
+                'duration' => 'required',
                 'price' => 'required|numeric|decimal:2|min:0',
-                'price' => 'required|numeric|decimal:2|min:0',
+                'tags' => 'array',
+                'tags.*' => 'required|string'
             ]);
 
-            $data_cleaned['code']=SubjectTools::codeSubject($data_cleaned['name']);
             if ($validator->fails()) {
-                return response()->json(["datos invalidos: " => $validator->erros(), 400]);
+                return response()->json(["datos invalidos: " => $validator->errors(), 400]);
             }
+            $tags = $request['tags'];
+
+            $data_cleaned['code'] = SubjectTools::codeSubject($data_cleaned['subject']);
             $subject = Subject::create($data_cleaned);
 
+            if ($request->has('next_course')) {
+                $id = SubjectTools::nextCourse($request['next_course'], $subject['id']);
+                $subject['next_course'] = Subject::find($id);
+            }
+            if ($request->has('last_course')) {
+                $id = SubjectTools::lastCourse($request['last_course'], $subject['id']);
+                $subject['last_course'] = Subject::find($id);
+            }
+
+            foreach ($tags as $tag) {
+                $t = SubjectTools::insertTags($tag, $subject['id'],'tags');
+                if ($t === false) {
+                    throw new Exception("Ocurrió un error");
+                }
+            }
             return  response()->json(["creado exitosamente: " => $subject], 201);
         } catch (\Throwable $th) {
             return response()->json(["message" => $th]);

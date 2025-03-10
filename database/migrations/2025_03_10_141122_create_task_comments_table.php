@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subject_tags', function (Blueprint $table) {
+        Schema::create('task_comments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subject_id')->constrained('subject')->onDelete('cascade');
-            $table->foreignId('tags_id')->constrained('tags')->onDelete('cascade'); 
+            $table->string('comment');
+            $table->foreignId('task_id')->constrained('task');
+            $table->foreignId('user_id')->constrained('users');
+            $table->timestamps();
         });
-        }
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('subject_tags');
+        Schema::dropIfExists('task_comments');
     }
 };

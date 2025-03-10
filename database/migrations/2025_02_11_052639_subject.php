@@ -13,8 +13,13 @@ return new class extends Migration
     {
         Schema::create('subject', function (Blueprint $table) {
             $table->id();
-            $table->string('subject', 14)->unique();
-            $table->boolean('state');  
+            $table->string('subject', 50);
+            $table->string('code', 15)->unique();
+            $table->foreignId('owner')->constrained('users');
+            $table->string('description', 1000);
+            $table->unsignedSmallInteger('duration')->unsigned();
+            $table->unsignedSmallInteger('price')->unsigned();
+            $table->boolean('state')->default(true);  
             $table->timestamps();
         });
         }

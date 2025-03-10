@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subject_tags', function (Blueprint $table) {
+        Schema::create('subject_next', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subject_id')->constrained('subject')->onDelete('cascade');
-            $table->foreignId('tags_id')->constrained('tags')->onDelete('cascade'); 
+            $table->foreignId('subject')->constrained('subject');
+            $table->foreignId('subject_next')->constrained('subject');
         });
         }
 
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subject_tags');
+        Schema::dropIfExists('subject_next');
     }
 };

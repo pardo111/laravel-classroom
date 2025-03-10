@@ -15,12 +15,11 @@ class Subject extends Model
     /** @use HasFactory<\Database\Factories\UserFactory> */
 
     use HasFactory, Notifiable, HasApiTokens;
+    protected $table = 'subject';
     protected $fillable = [
-        'name',
+        'subject',
         'code',
         'owner',
-        'category',
-        'tags',
         'description',
         'duration',
         'price',
