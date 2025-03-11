@@ -37,30 +37,50 @@ class SubjectController extends Controller
             if ($validator->fails()) {
                 return response()->json(["datos invalidos: " => $validator->errors(), 400]);
             }
-            $tags = $request['tags'];
 
+            $tags = $request['tags'];
+            $categories = $request['category'];
             $data_cleaned['code'] = SubjectTools::codeSubject($data_cleaned['subject']);
             $subject = Subject::create($data_cleaned);
 
-            if ($request->has('next_course')) {
-                $id = SubjectTools::nextCourse($request['next_course'], $subject['id']);
-                $subject['next_course'] = Subject::find($id);
-            }
-            if ($request->has('last_course')) {
-                $id = SubjectTools::lastCourse($request['last_course'], $subject['id']);
-                $subject['last_course'] = Subject::find($id);
-            }
-
-            foreach ($tags as $tag) {
-                $t = SubjectTools::insertTags($tag, $subject['id'],'tags');
-                if ($t === false) {
-                    throw new Exception("Ocurrió un error");
+            if ($request->hasAny(['next_course', 'last_course'])) {
+                foreach (['next_course' => 'subject_next', 'last_course' => 'subject_last'] as $key => $table) {
+                        $id = SubjectTools::insertLN($request[$key], $subject['id'], $table);
+                        $subject[$key] = Subject::find($id);
                 }
             }
+
+            SubjectTools::insertTC($tags, $subject['id'], 'tags');
+            SubjectTools::insertTC($categories, $subject['id'], 'category');
+
             return  response()->json(["creado exitosamente: " => $subject], 201);
         } catch (\Throwable $th) {
             return response()->json(["message" => $th]);
         }
+    }
+    // envia id y estado (1,0)
+    public static function visibilitySubject(Request $request)
+    {
+        try {
+            $drop = Subject::where('id', $request['id'])->update(['state' => $request['state']]);
+            return $drop ? response()->json([($request['state'] ? 'materia subida' : 'materia bajada')], 200) : response()->json('error al actualizar', 400);
+        } catch (\Throwable $th) {
+            return response()->json(["message" => $th]);
+        }
+    }
+    //envia en rango
+    public static function getAll(Request $request)
+    {
+        $subjects = Subject::whereBetween('id', $request['range'])->where(['state' => true])->get();
+        return response()->json($subjects, 200);
+    }
+    //recibe un solo parametro cualquiera
+    public static function getBy(Request $request)
+    {
+        $data = $request->json()->all();
+        $key = key($data);
+        $subject = Subject::where($key, 'like', '%' . $data[$key] . '%')->where('state', true)->get();
+        return response()->json($subject, 200);
     }
 
     public static function uploadTask(Request $request)
@@ -81,6 +101,7 @@ class SubjectController extends Controller
         }
         return response()->json('error', 500);
     }
+
     public static function getData(Request $request)
     {
         try {

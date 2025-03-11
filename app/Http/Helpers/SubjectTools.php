@@ -49,51 +49,38 @@ class SubjectTools
         return $code;
     }
 
-    public static function lastCourse($lastCourseId, $courseId)
+    public static function insertLN($relatedCourseId, $courseId, $table)
     {
-        $next_course = Subject::find($lastCourseId);
-
-        $next =  DB::table('subject_last')->insertGetId([
-            'subject_last' => $next_course['id'],
+        $relatedCourse = Subject::find($relatedCourseId);
+    
+        return DB::table($table)->insertGetId([
+            'subject_next' => $relatedCourse['id'],
             'subject' => $courseId
         ]);
-        return $next;
     }
+    
 
-    public static function nextCourse($nextCourseId, $courseId)
-    {
-        $last_course = Subject::find($nextCourseId);
-        $last = DB::table('subject_next')->insertGetId([
-            'subject_next' => $last_course['id'],
-            'subject' => $courseId
-        ]);
+    public static function insertTC($tc, $subject_id, $tab)
+    {   
 
-        return $last;
-    }
+        foreach($tc as $a){
+            $exists = DB::table($tab)->where($tab, $a)->exists();
 
-    public static function insertTags($tc, $subject_id, $tab)
-    {
-        $exists = DB::table($tab)->where($tab, $tc)->exists();
-
-        if ($exists) {
-            $tagId =  DB::table($tab)->where($tab, $tc)->value('id');
-        } else {
-            $tagId = DB::table($tab)->insertGetId([
-                $tab => $tc
+            if ($exists) {
+                $tagId =  DB::table($tab)->where($tab, $a)->value('id');
+            } else {
+                $tagId = DB::table($tab)->insertGetId([
+                    $tab => $a
+                ]);
+            }
+            DB::table('subject_'.$tab)->insert([
+                $tab.'_id' => $tagId,
+                'subject_id' => $subject_id
             ]);
         }
-        $insert = DB::table('subject_'.$tab)->insertGetId([
-            $tab.'_id' => $tagId,
-            'subject_id' => $subject_id
-        ]);
 
-        $subjectTag = DB::table('subject_'.$tab)->insertGetId([
-            $tab.'_id' => $tagId,
-            'subject_id' => $subject_id
-        ]);
-        dd($subjectTag);
-        return $insert ? $subjectTag : false ;
     }
 
-    public static function insertCategory($category) {}
-}
+
+
+ }

@@ -51,19 +51,14 @@ class AuthController extends Controller
        }
     }
 
-    // 🔹 Cerrar sesión
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
-
-        return response()->json([
-            'message' => 'Logged out successfully'
-        ]);
+        $request->user()->tokens->each(function ($token) {
+            $token->delete();
+        });
+    
+        return response()->json(['message' => 'Successfully logged out from all devices']);
     }
 
-    // 🔹 Obtener usuario autenticado
-    public function user(Request $request)
-    {
-        return response()->json($request->user());
-    }
+
 }
