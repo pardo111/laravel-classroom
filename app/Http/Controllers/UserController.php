@@ -62,4 +62,27 @@ class UserController extends Controller
         $user = User::where('id', $request['id'])->get();
         return response()->json($user, 200);
     }
+    // params id, photo
+    
+    public static function uploadPhoto(Request $request)
+    {
+        try {
+            $request->validate([
+                'user' => 'required|integer|exists:users,id',
+                'photo' => 'required '
+            ]);
+            $photo = $request['photo'];
+            $userId = $request['user'];
+            $user = User::where(['id'=>$userId])->select('name')->get();
+             $userHashed =  hash('sha256', $user[0]['name'].$userId);
+            $profile ='profile';
+    
+            $path= $userHashed."/".$profile;
+            $upload = FileController::upload($photo, $path);
+
+            return  $upload ? response()->json("archivo guardado con exito " , 200): response()->json("error al subir el archivo: " , 500);
+        } catch (\Throwable $th) {
+            return response()->json(["errores: "=> $th->getMessage()] , 500);
+        }
+    }
 }

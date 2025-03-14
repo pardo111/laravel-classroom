@@ -5,6 +5,7 @@ namespace App\Http\Helpers;
 use  App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use  App\Models\User;
 
 
 
@@ -16,21 +17,23 @@ class SubjectTools
     {
         try {
             $request->validate([
-                'user' => 'required|string|exists:users,id',
+                'user' => 'required|int|exists:users,id',
                 'subject' => 'required|string|exists:subject,id',
-                'activity' => 'required|string',
+                'activity' => 'required|int',
                 'file' => 'required|file|mimes:jpeg,png,pdf,rar,zip',
             ]);
-
-            $user = $request->input('user');
+            $userId = $request->input('user');
+            $user = User::where(['id'=>$userId])->select('name')->get();
             $subject = $request->input('subject');
             $activity = $request->input('activity');
-            $hashedUser = hash('sha256', $user);
+            $hashedUser = hash('sha256', $user[0]['name'].$userId);
             $hashedSubject = hash('sha256', $subject);
             $hashedActivity = hash('sha256', $activity);
+
             return [true, $hashedActivity, $hashedSubject, $hashedUser];
         } catch (\Throwable $th) {
-            return [false];
+            echo $th;
+            return [false] ;
         }
     }
 

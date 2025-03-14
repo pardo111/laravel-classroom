@@ -82,7 +82,7 @@ class SubjectController extends Controller
         $subject = Subject::where($key, 'like', '%' . $data[$key] . '%')->where('state', true)->get();
         return response()->json($subject, 200);
     }
-
+//
     public static function uploadTask(Request $request)
     {
         [$valid, $hashedActivity, $hashedSubject, $hashedUser] = SubjectTools::ValidateData($request);
