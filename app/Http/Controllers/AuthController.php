@@ -11,20 +11,21 @@ class AuthController extends Controller
     // 🔹 Registrar un usuario
     public function register(Request $request)
     {
-        $user  =   UserController::createUser($request);
-
+        $user = UserController::create($request);
+    
         if ($user instanceof \Illuminate\Http\JsonResponse) {
-            return $user;
+            return $user;  
         }
+    
         $token = $user->createToken('auth_token')->plainTextToken;
-
+    
         return response()->json([
             'message' => 'User registered successfully',
             'token' => $token,
             'user' => $user,
         ], 201);
     }
-
+    
      public function login(Request $request)
     {
         $request->validate([

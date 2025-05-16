@@ -26,8 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/getBy', [UserController::class, 'getBy']);
     
     //UPDATE
-    Route::post('/visibilitySubject', [SubjectController::class, 'visibilitySubject']);
-    Route::post('/updateUser', [UserController::class, 'update']);
+    Route::update('/visibilitySubject', [SubjectController::class, 'visibilitySubject']);
+    Route::update('/updateUser', [UserController::class, 'update']);
 
 });
 

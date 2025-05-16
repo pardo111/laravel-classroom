@@ -9,19 +9,24 @@ use  App\Models\User;
 class UsersTools
 {
 
-    public static function ValidateData(  $res)
+    public static function ValidateData($res)
     {
         $validator = Validator::make($res, [
             'name' => 'required|string|max:50',
             'lastname' => 'required|string|max:50',
             'born_date' => 'required|date_format:Y-m-d',
-            'password'=>'required|confirmed|min:8|max:40',
-            'email'=>'required|email|unique:users,email'
-        ]); 
-
-        return $validator->fails() ?   $validator->errors(): true;
+            'password' => 'required|confirmed|min:8|max:40',
+            'email' => 'required|email|unique:users,email',
+        ]);
+    
+        if ($validator->fails()) {
+            return $validator->errors();  
+        }
+    
+        return null;  
     }
 
+    
     public static function Code (){
         $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()`~';
 

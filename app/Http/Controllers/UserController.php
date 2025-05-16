@@ -5,12 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use  App\Models\User;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Helpers\Tools;
 use App\Http\Helpers\UsersTools;
 /*
-
-
+clase UserController 
+ 
 */
 
 
@@ -18,7 +17,7 @@ use App\Http\Helpers\UsersTools;
 class UserController extends Controller
 {
 
-    public static function createUser(Request $request)
+    public static function create(Request $request)
     {
         try {
             $data_cleaned = Tools::cleanData($request, [
@@ -29,15 +28,27 @@ class UserController extends Controller
                 'born_date',
                 'rol',
             ]);
-            $validate = UsersTools::ValidateData($data_cleaned);
-            $data_cleaned['password'] = Hash::make($data_cleaned['password']);
+    
+            $validationErrors = UsersTools::ValidateData($data_cleaned);
+            if ($validationErrors) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validationErrors
+                ], 422);
+            }
+    
             $data_cleaned['code'] = UsersTools::Code();
-
+    
             return User::create($data_cleaned);
+    
         } catch (\Throwable $th) {
-            return response()->json(["message" => $th]);
+            return response()->json([
+                'message' => 'Internal server error',
+                'error' => $th->getMessage(),
+            ], 500);
         }
     }
+    
     //envia en rango
     public static function getAll(Request $request)
     {
@@ -63,7 +74,7 @@ class UserController extends Controller
         return response()->json($user, 200);
     }
     // params id, photo
-    
+
     public static function uploadPhoto(Request $request)
     {
         try {
@@ -73,16 +84,16 @@ class UserController extends Controller
             ]);
             $photo = $request['photo'];
             $userId = $request['user'];
-            $user = User::where(['id'=>$userId])->select('name')->get();
-             $userHashed =  hash('sha256', $user[0]['name'].$userId);
-            $profile ='profile';
-    
-            $path= $userHashed."/".$profile;
+            $user = User::where(['id' => $userId])->select('name')->get();
+            $userHashed =  hash('sha256', $user[0]['name'] . $userId);
+            $profile = 'profile';
+
+            $path = $userHashed . "/" . $profile;
             $upload = FileController::upload($photo, $path);
 
-            return  $upload ? response()->json("archivo guardado con exito " , 200): response()->json("error al subir el archivo: " , 500);
+            return  $upload ? response()->json("archivo guardado con exito ", 200) : response()->json("error al subir el archivo: ", 500);
         } catch (\Throwable $th) {
-            return response()->json(["errores: "=> $th->getMessage()] , 500);
+            return response()->json(["errores: " => $th->getMessage()], 500);
         }
     }
 }
